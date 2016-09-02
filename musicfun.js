@@ -42,10 +42,13 @@
                 console.log(0, ispos, self.alltime - ispos)
                 if (ispos) bufferSource[bufferSource.start ? 'start' : 'noteOn'](0, ispos, self.alltime - ispos)
                 else bufferSource[bufferSource.start ? 'start' : 'noteOn'](0, self.currenttime, self.alltime)
-                bufferSource.onended = function (a, b, c) {
-                    console.log(222)
-                    if (!ispos && self.end) self.end()
-                }
+                bufferSource.onended = (function (ispos) {
+                    console.log(self.end)
+                    console.log(ispos)
+                    return function(){
+                        if (ispos && self.end) self.end()
+                    }
+                })(ispos)
                 self.source = bufferSource
                 console.log(bufferSource)
                 console.log(333)
@@ -161,7 +164,6 @@
             self.currentsongid = start
             self.currenturl = self.musiclist[self.currentsongid]['url']
         }
-        console.log(start,first)
         if (self.load) {
             self.stop = true
             self.load(self.currenturl, self.visualizer, first)
