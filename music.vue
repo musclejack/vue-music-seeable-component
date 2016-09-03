@@ -8,7 +8,6 @@
         <span class="presong" @click = "last()"><img src="../assets/logo.png"></span>
         <span class="pause" @click = "musicpause()"><img src="../assets/logo.png"></span>
         <span class="nextsong" @click = "next()"><img src="../assets/logo.png"></span>
-        {{parseInt(musicfun.currenttime)}}
     </div>
   </div>
 </template>

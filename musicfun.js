@@ -25,7 +25,7 @@
                 self.currenttime = 0
                 self.starttime = 0
             }
-            this.ispos = ispos
+            // this.ispos = ispos
             xhr.abort()
             xhr.open('GET', url)
             console.log(url)
@@ -42,16 +42,12 @@
                 console.log(0, ispos, self.alltime - ispos)
                 if (ispos) bufferSource[bufferSource.start ? 'start' : 'noteOn'](0, ispos, self.alltime - ispos)
                 else bufferSource[bufferSource.start ? 'start' : 'noteOn'](0, self.currenttime, self.alltime)
-                bufferSource.onended = (function (ispos) {
-                    console.log(self.end)
-                    console.log(ispos)
-                    return function(){
-                        if (ispos && self.end) self.end()
-                    }
-                })(ispos)
+                bufferSource.onended = function () {
+                    console.log(self.ispos)
+                    if (!self.ispos&&self.end) self.end()
+                }
                 self.source = bufferSource
-                console.log(bufferSource)
-                console.log(333)
+                self.ispos = ispos
                 if (callback) callback.call(self)
                     console.log(555)
                 }, 
@@ -83,8 +79,8 @@
             if (this.timeInter) window.clearInterval(self.timeInter)
             if (self.ispos) {
                 self.starttime = self.ispos
-
             }
+            self.ispos = false
             self.startoffset = self.ac.currentTime
             this.timeInter = setInterval(function(){
                 window.requestAnimationFrame(timev)
@@ -164,10 +160,12 @@
             self.currentsongid = start
             self.currenturl = self.musiclist[self.currentsongid]['url']
         }
+        self.ispos = first
         if (self.load) {
+            self.ispos = true
             self.stop = true
-            self.load(self.currenturl, self.visualizer, first)
-        } else {
+            self.load(self.currenturl, self.visualizer,first)
+        }else {
             self.load = self.loadmusicfun()
             self.load(self.currenturl, self.visualizer, first)
         }
@@ -193,12 +191,12 @@
     musicfun.prototype.next = function (id) {
         this.currentsongid++
         if (this.currentsongid > this.musiclist.length - 1) this.currentsongid = 0
-        this.loadmusic(this.currentsongid)
+        this.loadmusic(this.currentsongid, 0)
     }
     musicfun.prototype.last = function (id) {
         this.currentsongid--
         if (this.currentsongid < 0) this.currentsongid = this.musiclist.length - 1
-        this.loadmusic(this.currentsongid)
+        this.loadmusic(this.currentsongid, 0)
     }
     musicfun.prototype._init = function(){
         var ac = this.ac
