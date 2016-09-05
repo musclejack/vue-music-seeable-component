@@ -196,7 +196,6 @@
         }
         this.size = options.size?options.size:this.size
         this.musiclist = options.musiclist
-        this.timer = options.timer
     }
     musicfun.prototype.linecolor = function(color){
         if (!this.ctx) return console.log('没有实例canvas')
