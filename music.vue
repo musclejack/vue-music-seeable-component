@@ -2,11 +2,11 @@
   <div class="musicbox">
     <canvas id="musicwave" width="{{musicwave.width}}" height="{{musicwave.height}}"></canvas>
     <div class="silde" v-if = "silde">
-        <range :currentnum = "musicfun.currenttime" :maxnum = "musicfun.alltime"></range>
+        <range :currentnum = "musicfun.currentTime" :maxnum = "musicfun.duration"></range>
     </div>
     <div class="control" v-if = "control">
         <span class="presong" @click = "last()"><img src="../assets/logo.png"></span>
-        <span class="pause" @click = "musicpause()"><img src="../assets/logo.png"></span>
+        <span class="pause" @click = "pause()"><img src="../assets/logo.png"></span>
         <span class="nextsong" @click = "next()"><img src="../assets/logo.png"></span>
     </div>
   </div>
@@ -32,8 +32,8 @@ export default {
         last: function(){
             musicfun.last()
         },
-        musicpause: function(){
-            musicfun.musicpause()
+        pause: function(){
+            musicfun.pause()
         },
         next: function(){
             musicfun.next()

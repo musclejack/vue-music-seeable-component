@@ -1,101 +1,74 @@
     var musicfun = function () {
-        this.currenttime = 0
         this.musiclist = [
         ]
-        this.count = 0
         this.source = null
         this.ac = new (window.AudioContext || window.webkitAudioContext)()
-        this.alltime = 100
-        this.stop = false
-        this.starttime = 0
-        this.startoffset = 0
-        this.currentsongid = 0
+        this.currentSongId = 0
         this.size = 32
         this.end = null
+        this.currentTime = 0
+        this.duration = 0
     }
     musicfun.prototype.loadmusicfun = function () {
         var self = this
-        var XMLHttpRequest = window.XMLHttpRequest || window.ActiveXObject
-        var xhr = new XMLHttpRequest()
-        // 设置获取音频，然后连接解析器
-        var load = function (url, callback, ispos) {
-            var n = ++self.count
-            self.source && self.source[self.source.stop ? 'stop' : 'noteOff']()
-            if (!ispos) {
-                self.currenttime = 0
-                self.starttime = 0
+        //音乐初始化
+        var loadAudioElement = function (url) {
+            return new Promise(function(resolve, reject) {
+                self.audio = new Audio();
+                self.audio.addEventListener('canplay', function() {
+                    /* Resolve the promise, passing through the element. */
+                    if (self.canplay) self.canplay()
+                    resolve(self.audio);
+                });
+                /* Reject the promise on an error. */
+                self.audio.addEventListener('error', reject);
+                self.audio.src = url;
+                self.audio.crossOrigin = 'anonymous';
+            });
+        }
+        //音乐基本设置
+        var canplay = function (audio) {
+            self.source = self.ac.createMediaElementSource(audio)
+            audio.onended = function() {
+                self.source.disconnect()
+                self.source = null
+                if (self.end) self.end()
             }
-            // this.ispos = ispos
-            xhr.abort()
-            xhr.open('GET', url)
-            console.log(url)
-            xhr.responseType = 'arraybuffer'
-            xhr.onload = function () {
-                if (n !== self.count) return
-                self.ac.decodeAudioData(xhr.response, function (buffer) {
-                if (n !== self.count) return
-                self.alltime = buffer.duration
-                self.startoffset = self.ac.currentTime
-                var bufferSource = self.ac.createBufferSource()
-                bufferSource.buffer = buffer
-                bufferSource.connect(self.analyser)
-                console.log(0, ispos, self.alltime - ispos)
-                if (ispos) bufferSource[bufferSource.start ? 'start' : 'noteOn'](0, ispos, self.alltime - ispos)
-                else bufferSource[bufferSource.start ? 'start' : 'noteOn'](0, self.currenttime, self.alltime)
-                bufferSource.onended = function () {
-                    console.log(self.ispos)
-                    if (!self.ispos&&self.end) self.end()
-                }
-                self.source = bufferSource
-                self.ispos = ispos
-                if (callback) callback.call(self)
-                    console.log(555)
-                }, 
-                function (err) {
-                    console.log(err)
-                })
-            }
-            xhr.send()
+            self.source.connect(self.analyser)
+            // self.source.connect(self.ac.destination)初始化时候做了
+            self.duration = audio.duration
+            audio.play()
+        }
+        var rejectfun = function (reject) {
+            console.log(reject)
+        }
+        var docallback = function (callback) {
+            return function () {
+                if(callback) callback.call(self)
+            } 
+        }
+        //返回的函数
+        var load = function (url,callback) {
+            loadAudioElement(url).then(canplay,rejectfun).then(docallback(callback),rejectfun)
         }
         return load
     }
     musicfun.prototype.visualizer = function () {
         var self = this
-        var drawfunobj = this.drawfun()
+        var drawfunobj = self.drawfun()
         var arr = new Uint8Array(this.analyser.frequencyBinCount)
-        var timev
+        var overv
         window.requestAnimationFrame = window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame
         self.stop = false
-
-        if (this.timer) {
-            timev= function () {
-                if (self.stop) drawfunobj.drawcap()
-                else {
-                    self.analyser.getByteFrequencyData(arr)
-                    drawfunobj.draw(arr)
-                }
-                // window.requestAnimationFrame(v)
-            }
-            if (this.timeInter) window.clearInterval(self.timeInter)
-            if (self.ispos) {
-                self.starttime = self.ispos
-            }
-            self.ispos = false
-            self.startoffset = self.ac.currentTime
-            this.timeInter = setInterval(function(){
-                window.requestAnimationFrame(timev)
-            },this.timer)
-        }else{
-            timev = function () {
-                if (self.stop) drawfunobj.drawcap()
-                else {
-                    self.analyser.getByteFrequencyData(arr)
-                    drawfunobj.draw(arr)
-                }
-                window.requestAnimationFrame(overv)
+        overv = function () {
+            if (self.stop) drawfunobj.drawcap()
+            else {
+                self.analyser.getByteFrequencyData(arr)
+                drawfunobj.draw(arr)
             }
             window.requestAnimationFrame(overv)
-        } 
+        }
+        window.requestAnimationFrame(overv) 
     }
     musicfun.prototype.drawfun = function () {
         var self = this
@@ -117,8 +90,9 @@
         cap.addColorStop(1, self.config.capcolor)
         self.line = line
         self.cap = cap
+
         var draw = function (arr) {
-            self.currenttime = parseFloat(self.starttime) + parseFloat(self.ac.currentTime) - parseFloat(self.startoffset)
+            self.currentTime = self.audio.currentTime
             self.ctx.clearRect(0, 0, width, height)
             for (var i = 0; i < self.size; i++) {
                 var h = arr[i] / 256 * height
@@ -152,26 +126,24 @@
             drawcap: drawcap
         }
     }
-    musicfun.prototype.loadmusic =  function (start,first) {
+    musicfun.prototype.loadmusic =  function (start) {
         var self = this
         if (typeof start === 'string') {
-            self.currenturl = start
+            self.currentUrl = start
         } else if (typeof start === 'number') {
-            self.currentsongid = start
-            self.currenturl = self.musiclist[self.currentsongid]['url']
+            self.currentSongId = start
+            self.currentUrl = self.musiclist[self.currentSongId]['url']
         }
-        self.ispos = first
         if (self.load) {
-            self.ispos = true
-            self.stop = true
-            self.load(self.currenturl, self.visualizer,first)
-        }else {
+            self._disconnect()
+            self.load(self.currentUrl, self.visualizer)
+        } else {
             self.load = self.loadmusicfun()
-            self.load(self.currenturl, self.visualizer, first)
+            self.load(self.currentUrl, self.visualizer)
         }
     }
-    musicfun.prototype.musicpause = function () {
-        if (!this.source) return console.log('还没有实例') 
+    musicfun.prototype.pause = function () {
+        if (!this.audio) return console.log('没有实例') 
         if (this.stop) {
             this._connect()
         } else {
@@ -179,24 +151,22 @@
         }
     }
     musicfun.prototype._disconnect = function () {
-        this.starttime = this.currenttime
-        this.source.disconnect(this.analyser)
+        this.audio.pause()
         this.stop = true
     }
     musicfun.prototype._connect = function () {
-        this.startoffset = this.ac.currentTime
-        this.source.connect(this.analyser)
+        this.audio.play()
         this.stop = false
     }
     musicfun.prototype.next = function (id) {
-        this.currentsongid++
-        if (this.currentsongid > this.musiclist.length - 1) this.currentsongid = 0
-        this.loadmusic(this.currentsongid, 0)
+        this.currentSongId++
+        if (this.currentSongId > this.musiclist.length - 1) this.currentSongId = 0
+        this.loadmusic(this.currentSongId, 0)
     }
     musicfun.prototype.last = function (id) {
-        this.currentsongid--
-        if (this.currentsongid < 0) this.currentsongid = this.musiclist.length - 1
-        this.loadmusic(this.currentsongid, 0)
+        this.currentSongId--
+        if (this.currentSongId < 0) this.currentSongId = this.musiclist.length - 1
+        this.loadmusic(this.currentSongId, 0)
     }
     musicfun.prototype._init = function(){
         var ac = this.ac
@@ -234,7 +204,13 @@
         this.line = this.ctx.createLinearGradient(0, 0, 0, this.height)
         this.line.addColorStop(0, this.config.linecolor)
         this.line.addColorStop(1, this.config.linecolor)
-        console.log(this.cap)
+    }
+    musicfun.prototype.capcolor = function(color){
+        if (!this.ctx) return console.log('没有实例canvas')
+        this.config.capcolor = color
+        this.cap = this.ctx.createLinearGradient(0, 0, 0, this.height)
+        this.cap.addColorStop(0, this.config.capcolor)
+        this.cap.addColorStop(1, this.config.capcolor)
     }
 
 export default new musicfun()
