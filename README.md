@@ -32,24 +32,26 @@ data () {
     }
 }
 ```
-基本提供方法
-播放指定的音乐
-this.$chidren[0].musicfun.loadmusic(index);index为第几首歌；也可以传入对应的url；
-播放钩子(只需要把相应的函数赋值给相应的钩子，适当的时候就会触发)
+#### 基本提供方法
+播放指定的音乐：this.$chidren[0].musicfun.loadmusic(index);index为第几首歌；也可以传入对应的url；
+#### 播放钩子(只需要把相应的函数赋值给相应的钩子，适当的时候就会触发)
     可以播放且开始播放前触发canplay钩子，用法：
     this.$chidren[0].musicfun.canlpay = funcition(){}
     播放结束时触发end钩子，用法：
     this.$chidren[0].musicfun.end = funcition(){}
-设置播放进度this.$chidren[0].musicfun.audio.currentTime = time就可以改变播放进度
-获取相应的时间参数，目前播放时间和歌曲总时长。
-不建议使用this.$chidren[0].musicfun.audio.currentTime 和this.$chidren[0].musicfun.audio.duration（不会自动更新）
-推荐使用this.$chidren[0].musicfun.currentTime 和 $chidren[0].musicfun.duration ,会自动更新。
-设置帽头颜色this.$chidren[0].musicfun.capcolor(color);调用这和函数传入颜色参数
-设置柱条颜色this.$chidren[0].musicfun.lincolor(color);调用这和函数传入颜色参数
-可以动态改变的值：
-data里的options.config的值，都会赋值给this.$chidren[0].musicfun.config，想改变相应的样式可以这么做
-如：this.$chidren[0].musicfun.config.gaprate = 0.7(把间隔比例改为0.7)
-如：this.$chidren[0].musicfun.config.capheight = 6(把帽头高度改为6)
-上一曲方法this.$chidren[0].musicfun.last();也可以调用子组件的方法this.$chidren[0].last();推荐前者
-下一曲方法this.$chidren[0].musicfun.next();也可以调用子组件的方法this.$chidren[0].next();推荐前者
-暂停方法this.$chidren[0].musicfun.pause();也可以调用子组件的方法this.$chidren[0].pause();推荐前者
+#### 设置播放进度
+this.$chidren[0].musicfun.audio.currentTime = time就可以改变播放进度
+#### 获取相应的时间参数，目前播放时间和歌曲总时长。
+不建议使用this.$chidren[0].musicfun.audio.currentTime 和this.$chidren[0].musicfun.audio.duration（不会自动更新）    
+推荐使用this.$chidren[0].musicfun.currentTime 和 $chidren[0].musicfun.duration ,会自动更新。    
+#### 设置相应颜色
+设置帽头颜色this.$chidren[0].musicfun.capcolor(color);调用这和函数传入颜色参数    
+设置柱条颜色this.$chidren[0].musicfun.lincolor(color);调用这和函数传入颜色参数    
+#### 可以动态改变的值：
+data里的options.config的值，都会赋值给this.$chidren[0].musicfun.config，想改变相应的样式可以这么做    
+如：this.$chidren[0].musicfun.config.gaprate = 0.7(把间隔比例改为0.7)    
+如：this.$chidren[0].musicfun.config.capheight = 6(把帽头高度改为6)    
+#### 控制方法
+上一曲方法this.$chidren[0].musicfun.last();也可以调用子组件的方法this.$chidren[0].last();推荐前者    
+下一曲方法this.$chidren[0].musicfun.next();也可以调用子组件的方法this.$chidren[0].next();推荐前者    
+暂停方法this.$chidren[0].musicfun.pause();也可以调用子组件的方法this.$chidren[0].pause();推荐前者    
