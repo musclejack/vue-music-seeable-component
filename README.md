@@ -1,7 +1,7 @@
 # vue-music-seeable-component
 [查看演示](https://musclejack.github.io/musicseeable)
 
-简单用法，把这三个文件放到同一文件夹，import musicfun就可以了
+简单用法，把这三个文件放到同一文件夹，import musicfun就可以了(加入eslint报错，请关闭对这几个文件的检测)
 调用方法主要为this.$children[0].musicfun[api]
 api为组件的方法,this.$children[0]为组件，估计大家都懂，0看大家情况而定
 基本配置如下：
